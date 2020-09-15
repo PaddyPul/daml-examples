@@ -1,0 +1,129 @@
+module Com.Thekirschners.Daml.Doodle where
+
+import DA.List
+import DA.Text
+import DA.Traversable
+import DA.Optional
+import DA.TextMap
+
+data VotingSlot = VotingSlot
+  with
+    count : Int
+    voted : [Party]
+      deriving (Eq, Show)
+
+template Doodle
+  with
+    name: Text
+    organizer: Party
+    voters: [Party]
+    options: [Text]
+    votes: TextMap VotingSlot
+    open: Bool
+  where
+    signatory organizer
+    observer voters
+    ensure (unique voters) && (unique options)
+    key (organizer, name): (Party, Text)
+    maintainer (fst key)
+
+
+    preconsuming choice IssueInvites : ContractId Doodle
+      controller organizer 
+        do
+          assertMsg "this doodle has been opened for voting, cannot issue any more invites" (not open)
+          DA.Traversable.mapA (\voter -> create DoodleInvite with doodleName = this.name, organizer = this.organizer, voter = voter) voters
+          -- archive self
+          create this with open = True
+
+
+    choice CastVote: ContractId Doodle
+      with
+        voter: Party
+        option: Text
+      controller voter
+        do
+          assertMsg "this doodle not is open" open
+          assertMsg "this is not a valid option " (elem option options)
+          let
+            crtVotes = fromOptional (VotingSlot with count = 0, voted = []) (DA.TextMap.lookup option this.votes) 
+            updatedVotes = DA.TextMap.insert option (VotingSlot with count = crtVotes.count + 1, voted = voter :: crtVotes.voted) this.votes
+          assertMsg "each voter is only allowed to cast one vote per option" (notElem voter crtVotes.voted)
+          create this with votes = updatedVotes
+
+
+
+template DoodleInvite
+  with
+    doodleName: Text
+    organizer: Party
+    voter: Party
+  where
+    signatory organizer
+    observer voter
+    key (organizer, voter) : (Party, Party)
+    maintainer (fst key)
+
+    nonconsuming choice Vote : ContractId Doodle
+      with 
+        option: Text
+      controller voter
+        do
+          doodleContractId <- lookupByKey @Doodle (organizer, doodleName)
+          doodleContract <- fetch (fromSome doodleContractId)
+          assertMsg "this party does not own the doodle " (organizer == doodleContract.organizer)
+          exercise (fromSome doodleContractId) CastVote with voter = this.voter, option = option
+
+
+
+
+test = scenario do
+  organizer <- getParty "Doodle Organizer"
+  voter1 <- getParty "Voter 1"
+  voter2 <- getParty "Voter 2"
+  voter3 <- getParty "Voter 3"
+  voter4 <- getParty "Voter 4"
+
+  doodleV1 <- organizer `submit` do
+    create Doodle 
+      with 
+        name = "My Doodle"
+        organizer = organizer
+        voters = [voter1, voter2, voter3, voter4]
+        options = ["option1", "option2", "option3"]
+        votes = DA.TextMap.empty
+        open = False
+
+  organizer `submit` do
+    exercise doodleV1 IssueInvites
+
+
+  inviteId1 <- organizer `submit` do
+    lookupByKey @DoodleInvite (organizer, voter1)
+
+  inviteId2 <- organizer `submit` do
+    lookupByKey @DoodleInvite (organizer, voter2)
+
+  inviteId3 <- organizer `submit` do
+    lookupByKey @DoodleInvite (organizer, voter3)
+
+  inviteId4 <- organizer `submit` do
+    lookupByKey @DoodleInvite (organizer, voter4)
+
+  voter1 `submit` do
+    exercise (fromSome inviteId1) Vote with option = "option1"
+
+  voter2 `submit` do
+    exercise (fromSome inviteId2) Vote with option = "option1"
+
+  voter3 `submit` do
+    exercise (fromSome inviteId3) Vote with option = "option1"
+
+  voter4 `submit` do
+    exercise (fromSome inviteId4) Vote with option = "option3"
+
+  voter4 `submit` do
+    exercise (fromSome inviteId4) Vote with option = "option2"
+
+  pure()
+  
