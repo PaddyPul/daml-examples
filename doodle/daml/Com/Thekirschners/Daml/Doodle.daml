@@ -27,6 +27,20 @@ template Doodle
     key (organizer, name): (Party, Text)
     maintainer (fst key)
 
+    choice AddVoter : ContractId Doodle
+      with
+        voter: Party
+      controller organizer
+        do
+          create this with voters = voter::voters
+
+    choice RemoveVoter : ContractId Doodle
+      with
+        voter: Party
+      controller organizer
+        do
+          create this with voters = DA.List.delete voter voters
+
 
     preconsuming choice IssueInvites : ContractId Doodle
       controller organizer 
@@ -75,8 +89,6 @@ template DoodleInvite
           exercise (fromSome doodleContractId) CastVote with voter = this.voter, option = option
 
 
-
-
 test = scenario do
   organizer <- getParty "Doodle Organizer"
   voter1 <- getParty "Voter 1"
@@ -89,13 +101,16 @@ test = scenario do
       with 
         name = "My Doodle"
         organizer = organizer
-        voters = [voter1, voter2, voter3, voter4]
+        voters = [voter1, voter2, voter3]
         options = ["option1", "option2", "option3"]
         votes = DA.TextMap.empty
         open = False
 
+  doodleV2 <- organizer `submit` do
+    exercise doodleV1 AddVoter with voter = voter4
+
   organizer `submit` do
-    exercise doodleV1 IssueInvites
+    exercise doodleV2 IssueInvites
 
 
   inviteId1 <- organizer `submit` do
@@ -107,23 +122,23 @@ test = scenario do
   inviteId3 <- organizer `submit` do
     lookupByKey @DoodleInvite (organizer, voter3)
 
-  inviteId4 <- organizer `submit` do
-    lookupByKey @DoodleInvite (organizer, voter4)
+  -- inviteId4 <- organizer `submit` do
+  --   lookupByKey @DoodleInvite (organizer, voter4)
 
-  voter1 `submit` do
-    exercise (fromSome inviteId1) Vote with option = "option1"
+  -- voter1 `submit` do
+  --   exercise (fromSome inviteId1) Vote with option = "option1"
 
-  voter2 `submit` do
-    exercise (fromSome inviteId2) Vote with option = "option1"
+  -- voter2 `submit` do
+  --   exercise (fromSome inviteId2) Vote with option = "option1"
 
-  voter3 `submit` do
-    exercise (fromSome inviteId3) Vote with option = "option1"
+  -- voter3 `submit` do
+  --   exercise (fromSome inviteId3) Vote with option = "option1"
 
-  voter4 `submit` do
-    exercise (fromSome inviteId4) Vote with option = "option3"
+  -- voter4 `submit` do
+  --   exercise (fromSome inviteId4) Vote with option = "option3"
 
-  voter4 `submit` do
-    exercise (fromSome inviteId4) Vote with option = "option2"
+  -- voter4 `submit` do
+  --   exercise (fromSome inviteId4) Vote with option = "option2"
 
   pure()
   
