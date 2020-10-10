@@ -98,22 +98,7 @@ To see your deployed instance of `create-daml-app` in action, follow the
 "Visit site" link at the top right corner of your "UI Assets" page.
 
 
-## Next steps
 
-There are many directions in which this application can be extended.
-Regardless of which direction you pick, the following files will be the most
-interesting ones to familiarize yourself with:
-
-- [`daml/User.daml`](daml/User.daml): the DAML model of the social network
-- `daml.js/create-daml-app-0.1.0/src/User.ts` (once you've generated it):
-  a reflection of the types contained in the DAML model in TypeScript
-- [`ui/src/components/MainView.tsx`](ui/src/components/MainView.tsx):
-  a React component using the HTTP Ledger API and rendering the main features
-
-
-## Useful resources
-
-TBD
 
 
 ## How to get help
