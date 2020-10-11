@@ -58,6 +58,7 @@ template Doodle
       controller voter
         do
           assertMsg "this doodle not is open" open
+          assertMsg "voters is not one of the invited voters" (elem voter voters)
           assertMsg "this is not a valid option " (elem option options)
           let
             crtVotes = fromOptional (VotingSlot with count = 0, voted = []) (DA.TextMap.lookup option this.votes) 
@@ -122,23 +123,23 @@ test = scenario do
   inviteId3 <- organizer `submit` do
     lookupByKey @DoodleInvite (organizer, voter3)
 
-  -- inviteId4 <- organizer `submit` do
-  --   lookupByKey @DoodleInvite (organizer, voter4)
+  inviteId4 <- organizer `submit` do
+    lookupByKey @DoodleInvite (organizer, voter4)
 
-  -- voter1 `submit` do
-  --   exercise (fromSome inviteId1) Vote with option = "option1"
+  voter1 `submit` do
+    exercise (fromSome inviteId1) Vote with option = "option1"
 
-  -- voter2 `submit` do
-  --   exercise (fromSome inviteId2) Vote with option = "option1"
+  voter2 `submit` do
+    exercise (fromSome inviteId2) Vote with option = "option1"
 
-  -- voter3 `submit` do
-  --   exercise (fromSome inviteId3) Vote with option = "option1"
+  voter3 `submit` do
+    exercise (fromSome inviteId3) Vote with option = "option1"
 
-  -- voter4 `submit` do
-  --   exercise (fromSome inviteId4) Vote with option = "option3"
+  voter4 `submit` do
+    exercise (fromSome inviteId4) Vote with option = "option3"
 
-  -- voter4 `submit` do
-  --   exercise (fromSome inviteId4) Vote with option = "option2"
+  voter4 `submit` do
+    exercise (fromSome inviteId4) Vote with option = "option2"
 
   pure()
   
