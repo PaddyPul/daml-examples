@@ -51,12 +51,17 @@ template Doodle
           create this with open = True
 
 
-    choice CastVote: ContractId Doodle
+    preconsuming choice CastVote: ContractId Doodle
       with
-        voter: Party
+        voter: Party        
         option: Text
+        inviteId: ContractId DoodleInvite
       controller voter
         do
+          invite <- fetch inviteId
+          assertMsg "this invite was issued for a different doodle" (invite.doodleName == name)
+          assertMsg "the voter casting the vote does not match the voter who received the invite" (invite.voter == voter)
+          assertMsg "the organizer who issued the invite is not the one who created this doodle" (invite.organizer == organizer)
           assertMsg "this doodle not is open" open
           assertMsg "voters is not one of the invited voters" (elem voter voters)
           assertMsg "this is not a valid option " (elem option options)
@@ -87,7 +92,7 @@ template DoodleInvite
           doodleContractId <- lookupByKey @Doodle (organizer, doodleName)
           doodleContract <- fetch (fromSome doodleContractId)
           assertMsg "this party does not own the doodle " (organizer == doodleContract.organizer)
-          exercise (fromSome doodleContractId) CastVote with voter = this.voter, option = option
+          exercise (fromSome doodleContractId) CastVote with voter = this.voter, option = option, inviteId = self
 
 
 test = scenario do
