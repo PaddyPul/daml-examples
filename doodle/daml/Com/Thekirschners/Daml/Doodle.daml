@@ -81,8 +81,8 @@ template DoodleInvite
   where
     signatory organizer
     observer voter
-    key (organizer, voter) : (Party, Party)
-    maintainer (fst key)
+    key (organizer, voter, doodleName) : (Party, Party, Text)
+    maintainer key._1
 
     nonconsuming choice Vote : ContractId Doodle
       with 
@@ -120,16 +120,16 @@ test = scenario do
 
 
   inviteId1 <- organizer `submit` do
-    lookupByKey @DoodleInvite (organizer, voter1)
+    lookupByKey @DoodleInvite (organizer, voter1, "My Doodle")
 
   inviteId2 <- organizer `submit` do
-    lookupByKey @DoodleInvite (organizer, voter2)
+    lookupByKey @DoodleInvite (organizer, voter2, "My Doodle")
 
   inviteId3 <- organizer `submit` do
-    lookupByKey @DoodleInvite (organizer, voter3)
+    lookupByKey @DoodleInvite (organizer, voter3, "My Doodle")
 
   inviteId4 <- organizer `submit` do
-    lookupByKey @DoodleInvite (organizer, voter4)
+    lookupByKey @DoodleInvite (organizer, voter4, "My Doodle")
 
   voter1 `submit` do
     exercise (fromSome inviteId1) Vote with option = "option1"
