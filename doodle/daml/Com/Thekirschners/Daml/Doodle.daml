@@ -1,10 +1,12 @@
 module Com.Thekirschners.Daml.Doodle where
 
 import DA.List
-import DA.Text
+import DA.Text()
+import DA.Assert
 import DA.Traversable
 import DA.Optional
 import DA.TextMap
+import Daml.Script
 
 data VotingSlot = VotingSlot
   with
@@ -95,25 +97,36 @@ template DoodleInvite
           exercise (fromSome doodleContractId) CastVote with voter = this.voter, option = option, inviteId = self
 
 
-test = scenario do
-  organizer <- getParty "Doodle Organizer"
-  voter1 <- getParty "Voter 1"
-  voter2 <- getParty "Voter 2"
-  voter3 <- getParty "Voter 3"
-  voter4 <- getParty "Voter 4"
+test = script do
+  organizer <- allocateParty "Doodle Organizer"
+  voter1 <- allocateParty "Voter 1"
+  voter2 <- allocateParty "Voter 2"
+  voter3 <- allocateParty "Voter 3"
+  voter4 <- allocateParty "Voter 4"
 
-  doodleV1 <- organizer `submit` do
-    create Doodle 
-      with 
-        name = "My Doodle"
-        organizer = organizer
-        voters = [voter1, voter2, voter3]
-        options = ["option1", "option2", "option3"]
-        votes = DA.TextMap.empty
-        open = False
+  doodleV1 <- submit organizer do
+    createCmd Doodle with 
+      name = "My Doodle"
+      organizer = organizer
+      voters = [voter1, voter2, voter2]
+      options = ["option1", "option2", "option3"]
+      votes = DA.TextMap.empty
+      open = False 
+  Some createdDoodle <- queryContractId organizer doodleV1
+  assertEq createdDoodle.organizer organizer
 
+
+
+
+
+    
+
+{-
   doodleV2 <- organizer `submit` do
     exercise doodleV1 AddVoter with voter = voter4
+
+  doodleV2 <- organizer `submit` do
+    exercise doodleV1 AddVoter with voter = voter4  
 
   organizer `submit` do
     exercise doodleV2 IssueInvites
@@ -144,7 +157,7 @@ test = scenario do
     exercise (fromSome inviteId4) Vote with option = "option3"
 
   voter4 `submit` do
-    exercise (fromSome inviteId4) Vote with option = "option2"
+    exercise (fromSome inviteId4) Vote with option = "option2" -}
 
   pure()
   

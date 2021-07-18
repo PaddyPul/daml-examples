@@ -1,15 +1,18 @@
-sdk-version: 1.4.0
+sdk-version: 1.14.2
 name: DamlDoodle
 version: 0.1.0
 source: daml
 parties:
-- Alice
-- Bob
-- Charlie
+- Doodle Organizer
+- Voter 1
+- Voter 2
+- Voter 3
+- Voter 4
 dependencies:
 - daml-prim
 - daml-stdlib
 - daml-trigger
+- daml-script
 sandbox-options:
 - --wall-clock-time
 - --ledgerid=create-daml-app-sandbox
