@@ -1,0 +1,30 @@
+module Scripts.Scenario1 where
+import Daml.Script
+import Main
+import Scripts.LedgerPartySetup
+import qualified DA.TextMap as DATextMap
+
+creatingDoodle : LedgerParties -> Script(ContractId Doodle)
+creatingDoodle parties = script do
+    doodle <-  submit parties.organizer do 
+        createCmd Doodle with 
+            name = "SampleDoodle"
+            organizer = parties.organizer
+            voters = [parties.voter1]
+            options = []
+            votes = DATextMap.empty
+            open = True
+    return (doodle)
+
+addVoter : Text ->LedgerParties -> Script (ContractId Doodle)
+addVoter doodleName parties = script do
+    [(doodle,_)]<- queryFilter @Doodle parties.organizer
+      (\d -> (d.name == "SampleDoodle"))
+    
+    () <-  submitMustFail parties.organizer do 
+        exerciseCmd doodle AddVoter with 
+            voter = parties.voter1
+    doodle <-  submit parties.organizer do 
+        exerciseCmd doodle AddVoter with 
+            voter = parties.voter4
+    return (doodle)

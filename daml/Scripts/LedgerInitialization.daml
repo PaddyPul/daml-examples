@@ -1,0 +1,18 @@
+module Scripts.LedgerInitialization where
+
+import Daml.Script
+import Scripts.LedgerPartySetup
+import Scripts.Scenario1
+ 
+
+test : Script (LedgerParties)
+test  = script do
+    organizer <- allocatePartyWithHint "Organizer" (PartyIdHint "Organizer")
+    voter1 <- allocatePartyWithHint "Agent For Uganda" (PartyIdHint "Agent For Uganda")
+    voter2 <- allocatePartyWithHint "Agent For Ghana" (PartyIdHint "Agent for Ghana")
+    voter3 <- allocatePartyWithHint "Control Body" (PartyIdHint "Control Body")
+    voter4 <- allocatePartyWithHint "EU" (PartyIdHint "EU")
+    let parties = LedgerParties{..}
+    Scripts.Scenario1.creatingDoodle parties 
+    Scripts.Scenario1.addVoter "SampleDoodle" parties 
+    pure (parties)

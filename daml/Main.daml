@@ -1,12 +1,16 @@
-module Com.Thekirschners.Daml.Doodle where
+{-# LANGUAGE ApplicativeDo #-}
+module Main where
 
 import DA.List
+import DA.Time
+import DA.Date
 import DA.Text()
-import DA.Assert
+import DA.Assert()
 import DA.Traversable
 import DA.Optional
 import DA.TextMap
 import Daml.Script
+
 
 data VotingSlot = VotingSlot
   with
@@ -98,22 +102,24 @@ template DoodleInvite
 
 
 test = script do
-  organizer <- allocateParty "Doodle Organizer"
-  voter1 <- allocateParty "Voter 1"
-  voter2 <- allocateParty "Voter 2"
-  voter3 <- allocateParty "Voter 3"
-  voter4 <- allocateParty "Voter 4"
+    organizer <- allocateParty "Doodle Organizer"
+    voter1 <- allocateParty "Voter 1"
+    voter2 <- allocateParty "Voter 2"
+    voter3 <- allocateParty "Voter 3"
+    voter4 <- allocateParty "Voter 4"
+    setTime (DA.Time.time (date 2021 May 5) 14 30 05)
 
-  doodleV1 <- submit organizer do
-    createCmd Doodle with 
-      name = "My Doodle"
-      organizer = organizer
-      voters = [voter1, voter2, voter2]
-      options = ["option1", "option2", "option3"]
-      votes = DA.TextMap.empty
-      open = False 
-  Some createdDoodle <- queryContractId organizer doodleV1
-  assertEq createdDoodle.organizer organizer
+
+    {-doodleV1 <- submit organizer do
+      createCmd Doodle with 
+        name = "My Doodle"
+        organizer = organizer
+        voters = [voter1, voter2, voter2]
+        options = ["option1", "option2", "option3"]
+        votes = DA.TextMap.empty
+        open = False 
+    Some createdDoodle <- queryContractId organizer doodleV1
+    assertEq createdDoodle.organizer organizer -}
 
 
 
@@ -159,5 +165,5 @@ test = script do
   voter4 `submit` do
     exercise (fromSome inviteId4) Vote with option = "option2" -}
 
-  pure()
+
   

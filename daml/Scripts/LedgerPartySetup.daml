@@ -1,0 +1,8 @@
+{-# LANGUAGE ApplicativeDo #-}
+module Scripts.LedgerPartySetup where
+data LedgerParties = LedgerParties with
+  organizer : Party
+  voter1 : Party
+  voter2 : Party
+  voter3 : Party
+  voter4 : Party
