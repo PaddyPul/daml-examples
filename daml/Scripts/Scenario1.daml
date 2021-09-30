@@ -1,5 +1,6 @@
 module Scripts.Scenario1 where
 import Daml.Script
+--import DA.Foldable
 import Main
 import Scripts.LedgerPartySetup
 import qualified DA.TextMap as DATextMap
@@ -21,10 +22,25 @@ addVoter doodleName parties = script do
     [(doodle,_)]<- queryFilter @Doodle parties.organizer
       (\d -> (d.name == "SampleDoodle"))
     
-    () <-  submitMustFail parties.organizer do 
-        exerciseCmd doodle AddVoter with 
-            voter = parties.voter1
+    -- use a forA to add voters to doodle
+    
     doodle <-  submit parties.organizer do 
         exerciseCmd doodle AddVoter with 
             voter = parties.voter4
+
+    -- voter already added to doodle
+    () <-  submitMustFail parties.organizer do 
+        exerciseCmd doodle AddVoter with 
+            voter = parties.voter1
     return (doodle)
+
+addVoters : LedgerParties->Text->[Party] -> Script [ContractId Doodle]
+addVoters parties doodleName [] = pure [] -- no voters so nothing is done
+addVoters parties doodleName (newVoters :: voters) = script do 
+    [(doodle,_)]<- queryFilter @Doodle parties.organizer
+      (\d -> (d.name == doodleName))
+-- at least one voter, create that
+    doodlecId <- submit parties.organizer $ exerciseCmd doodle AddVoter with voter = parties.voter1
+-- then recursively call AddVoter to handle the tail of the list
+    doodlecIds <- addVoters parties doodleName [newVoters]
+    return (doodlecId::doodlecIds)

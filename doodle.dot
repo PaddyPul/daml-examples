@@ -1,0 +1,37 @@
+digraph G {
+compound=true;
+rankdir=LR;
+subgraph cluster_Doodle{
+n0[label=Create][color=green]; 
+n1[label=AddVoter][color=red]; 
+n2[label=RemoveVoter][color=red]; 
+n3[label=IssueInvites][color=green]; 
+n4[label=CastVote][color=green]; 
+n5[label=Archive][color=red]; 
+label=<<table align = "left" border="0" cellborder="0" cellspacing="1">
+<tr><td align="center"><b>Doodle</b></td></tr><tr><td align="left">name</td></tr> 
+<tr><td align="left">organizer</td></tr> 
+<tr><td align="left">voters</td></tr> 
+<tr><td align="left">options</td></tr> 
+<tr><td align="left">votes</td></tr> 
+<tr><td align="left">open</td></tr> 
+</table>>;color=blue
+}subgraph cluster_DoodleInvite{
+n6[label=Create][color=green]; 
+n7[label=Archive][color=red]; 
+n8[label=Vote][color=green]; 
+label=<<table align = "left" border="0" cellborder="0" cellspacing="1">
+<tr><td align="center"><b>DoodleInvite</b></td></tr><tr><td align="left">doodleName</td></tr> 
+<tr><td align="left">organizer</td></tr> 
+<tr><td align="left">voter</td></tr> 
+</table>>;color=blue
+}n1->n0
+n2->n0
+n3->n0
+n3->n6
+n3->n5
+n4->n0
+n4->n5
+n8->n4
+
+}

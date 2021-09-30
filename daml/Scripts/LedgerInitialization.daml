@@ -15,4 +15,5 @@ test  = script do
     let parties = LedgerParties{..}
     Scripts.Scenario1.creatingDoodle parties 
     Scripts.Scenario1.addVoter "SampleDoodle" parties 
+    Scripts.Scenario1.addVoters parties "SampleDoodle" []
     pure (parties)
