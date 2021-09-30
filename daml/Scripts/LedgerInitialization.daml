@@ -15,6 +15,8 @@ test  = script do
     let parties = LedgerParties{..}
     Scripts.Scenario1.creatingDoodle parties 
     --Scripts.Scenario1.addVoter "SampleDoodle" parties 
-    -- adding voters recusrsively
+    
+    
+    -- adding voters recursively
     Scripts.Scenario1.addVoters parties "SampleDoodle" [voter1,voter2,voter3,voter4]
     pure (parties)
