@@ -14,6 +14,7 @@ test  = script do
     voter4 <- allocatePartyWithHint "EU" (PartyIdHint "EU")
     let parties = LedgerParties{..}
     Scripts.Scenario1.creatingDoodle parties 
-    Scripts.Scenario1.addVoter "SampleDoodle" parties 
-    Scripts.Scenario1.addVoters parties "SampleDoodle" []
+    --Scripts.Scenario1.addVoter "SampleDoodle" parties 
+    -- adding voters recusrsively
+    Scripts.Scenario1.addVoters parties "SampleDoodle" [voter1,voter2,voter3,voter4]
     pure (parties)

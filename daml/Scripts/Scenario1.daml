@@ -4,6 +4,7 @@ import Daml.Script
 import Main
 import Scripts.LedgerPartySetup
 import qualified DA.TextMap as DATextMap
+import DA.List (tail, head)
 
 creatingDoodle : LedgerParties -> Script(ContractId Doodle)
 creatingDoodle parties = script do
@@ -11,7 +12,7 @@ creatingDoodle parties = script do
         createCmd Doodle with 
             name = "SampleDoodle"
             organizer = parties.organizer
-            voters = [parties.voter1]
+            voters = []
             options = []
             votes = DATextMap.empty
             open = True
@@ -34,13 +35,13 @@ addVoter doodleName parties = script do
             voter = parties.voter1
     return (doodle)
 
-addVoters : LedgerParties->Text->[Party] -> Script [ContractId Doodle]
+addVoters : LedgerParties ->Text->[Party]-> Script [ContractId Doodle]
 addVoters parties doodleName [] = pure [] -- no voters so nothing is done
-addVoters parties doodleName (newVoters :: voters) = script do 
+addVoters parties doodleName newVoters = script do 
     [(doodle,_)]<- queryFilter @Doodle parties.organizer
       (\d -> (d.name == doodleName))
 -- at least one voter, create that
-    doodlecId <- submit parties.organizer $ exerciseCmd doodle AddVoter with voter = parties.voter1
+    doodlecId <- submit parties.organizer $ exerciseCmd doodle AddVoter with voter = head newVoters
 -- then recursively call AddVoter to handle the tail of the list
-    doodlecIds <- addVoters parties doodleName [newVoters]
+    doodlecIds <- addVoters parties doodleName (tail newVoters)
     return (doodlecId::doodlecIds)
