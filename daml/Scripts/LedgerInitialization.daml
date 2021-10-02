@@ -8,15 +8,15 @@ import Scripts.Scenario1
 test : Script (LedgerParties)
 test  = script do
     organizer <- allocatePartyWithHint "Organizer" (PartyIdHint "Organizer")
-    voter1 <- allocatePartyWithHint "Agent For Uganda" (PartyIdHint "Agent For Uganda")
-    voter2 <- allocatePartyWithHint "Agent For Ghana" (PartyIdHint "Agent for Ghana")
-    voter3 <- allocatePartyWithHint "Control Body" (PartyIdHint "Control Body")
-    voter4 <- allocatePartyWithHint "EU" (PartyIdHint "EU")
+    voter1 <- allocatePartyWithHint "Voter1" (PartyIdHint "Voter1")
+    voter2 <- allocatePartyWithHint "Voter2" (PartyIdHint "Voter2")
+    voter3 <- allocatePartyWithHint "Voter3" (PartyIdHint "Voter3")
+    voter4 <- allocatePartyWithHint "Voter4" (PartyIdHint "Voter4")
     let parties = LedgerParties{..}
     Scripts.Scenario1.creatingDoodle parties 
-    --Scripts.Scenario1.addVoter "SampleDoodle" parties 
-    
-    
     -- adding voters recursively
-    Scripts.Scenario1.addVoters parties "SampleDoodle" [voter1,voter2,voter3,voter4]
+    Scripts.Scenario1.addVoters parties "SampleDoodle" [voter2,voter3]
+    Scripts.Scenario1.addVoters parties "SampleDoodle" [voter1,voter4]
+  
+    Scripts.Scenario1.addVoter "SampleDoodle" parties
     pure (parties)

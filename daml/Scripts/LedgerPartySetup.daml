@@ -1,3 +1,4 @@
+
 {-# LANGUAGE ApplicativeDo #-}
 module Scripts.LedgerPartySetup where
 data LedgerParties = LedgerParties with
@@ -6,3 +7,7 @@ data LedgerParties = LedgerParties with
   voter2 : Party
   voter3 : Party
   voter4 : Party
+
+{-toParties : LedgerParties -> [Party]
+toParties parties = do
+  return (parties.voter1)-}

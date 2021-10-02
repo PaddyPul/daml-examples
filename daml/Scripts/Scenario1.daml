@@ -1,6 +1,5 @@
 module Scripts.Scenario1 where
 import Daml.Script
---import DA.Foldable
 import Main
 import Scripts.LedgerPartySetup
 import qualified DA.TextMap as DATextMap
@@ -23,9 +22,8 @@ addVoter doodleName parties = script do
     [(doodle,_)]<- queryFilter @Doodle parties.organizer
       (\d -> (d.name == "SampleDoodle"))
     
-    -- use a forA to add voters to doodle
     
-    doodle <-  submit parties.organizer do 
+    () <-  submitMustFail parties.organizer do 
         exerciseCmd doodle AddVoter with 
             voter = parties.voter4
 
