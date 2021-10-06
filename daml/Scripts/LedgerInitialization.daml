@@ -1,22 +1,77 @@
+{-# LANGUAGE ApplicativeDo #-}
 module Scripts.LedgerInitialization where
 
 import Daml.Script
-import Scripts.LedgerPartySetup
-import Scripts.Scenario1
+--import Scripts.LedgerPartySetup
+--import Scripts.Scenario1
+import Main
+import DA.TextMap
  
 
-test : Script (LedgerParties)
+
 test  = script do
-    organizer <- allocatePartyWithHint "Organizer" (PartyIdHint "Organizer")
-    voter1 <- allocatePartyWithHint "Voter1" (PartyIdHint "Voter1")
-    voter2 <- allocatePartyWithHint "Voter2" (PartyIdHint "Voter2")
-    voter3 <- allocatePartyWithHint "Voter3" (PartyIdHint "Voter3")
-    voter4 <- allocatePartyWithHint "Voter4" (PartyIdHint "Voter4")
-    let parties = LedgerParties{..}
+    organizer <- allocateParty "Organizer"
+    voter1 <- allocateParty "Voter1"
+    voter2 <- allocateParty "Voter2" 
+    voter3 <- allocateParty "Voter3" 
+    voter4 <- allocateParty "Voter4"
+    -- creating doodle
+    doodle <-  submit organizer do 
+        createCmd Doodle with 
+            name = "SampleDoodle"
+            organizer = organizer
+            voters = []
+            options = ["Yes","NO"]
+            votes = DA.TextMap.empty
+            open = False
+    -- Adding voters
+    doodle <-  submit organizer do 
+        exerciseCmd doodle AddVoter with 
+            voter = voter1
+    doodle <-  submit organizer do 
+        exerciseCmd doodle AddVoter with 
+            voter = voter2
+    doodle <-  submit organizer do 
+        exerciseCmd doodle AddVoter with 
+            voter = voter3
+    doodle <-  submit organizer do 
+        exerciseCmd doodle AddVoter with 
+            voter = voter4
+
+    -- Issuing Invites
+    doodle <-  submit organizer do 
+        exerciseCmd doodle IssueInvites with 
+    
+    -- Casting Votes
+    [(voter1Invite,_)]<- queryFilter @DoodleInvite voter1
+      (\d -> (d.doodleName == "SampleDoodle"))
+    [(voter2Invite,_)]<- queryFilter @DoodleInvite voter2
+      (\d -> (d.doodleName == "SampleDoodle"))
+    [(voter3Invite,_)]<- queryFilter @DoodleInvite voter3
+      (\d -> (d.doodleName == "SampleDoodle"))
+    [(voter4Invite,_)]<- queryFilter @DoodleInvite voter4
+      (\d -> (d.doodleName == "SampleDoodle"))
+    
+    
+    doodle <-  submit voter1 do 
+        exerciseCmd voter1Invite Vote with 
+           option = "Yes" 
+    doodle <-  submit voter2 do 
+        exerciseCmd voter2Invite Vote with 
+           option = "NO"
+    doodle <-  submit voter3 do 
+        exerciseCmd voter3Invite Vote with 
+           option = "Yes"
+    doodle <-  submit voter4 do 
+        exerciseCmd voter4Invite Vote with 
+           option = "NO"
+    pure ()
+
+   {- let parties = LedgerParties{..}
     Scripts.Scenario1.creatingDoodle parties 
     -- adding voters recursively
     Scripts.Scenario1.addVoters parties "SampleDoodle" [voter2,voter3]
     Scripts.Scenario1.addVoters parties "SampleDoodle" [voter1,voter4]
   
     Scripts.Scenario1.addVoter "SampleDoodle" parties
-    pure (parties)
+    pure (parties)-}
